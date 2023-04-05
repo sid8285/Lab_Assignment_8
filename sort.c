@@ -1,20 +1,130 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int extraMemoryAllocated;
+
+void heapify(int arr[], int n, int i) {
+    // Initialize largest as root
+	int largest = i; 
+
+	// finding the left child usinf the equation: left = 2*i + 1
+    int l = 2 * i + 1; 
+
+	// finding the right child using the equation: right = 2*i + 2
+    int r = 2 * i + 2; 
+ 
+    // comparative process to see if left child is larger than root
+    if (l < n && arr[l] > arr[largest])
+        largest = l;
+ 
+    // checking to see if right child is larger than largest so far
+    if (r < n && arr[r] > arr[largest])
+        largest = r;
+ 
+    // process included in case largest is not root
+    if (largest != i) {
+        int temp = arr[i];
+        arr[i] = arr[largest];
+        arr[largest] = temp;
+ 
+        // Recursively heapify the affected sub-tree
+        heapify(arr, n, largest);
+    }
+}
+ 
 
 // implements heap sort
 // extraMemoryAllocated counts bytes of memory allocated
 void heapSort(int arr[], int n)
 {
+	  int i;
+ 
+    // Build heap (rearrange array)
+    for (i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+ 
+    // One by one extract an element from heap
+    for (i = n - 1; i >= 0; i--) {
+        // Move current root to end
+        int temp = arr[0];
+        arr[0] = arr[i];
+        arr[i] = temp;
+ 
+        // call max heapify on the reduced heap
+        heapify(arr, i, 0);
+    }
 }
+
+//merge fucntion to perform merge sort
+void merge(int pData[], int l, int m, int r)
+{
+	//in this "l" is the first number in the array (index 0), "m" is the middle digit, and "r" is the last index in the array
+	//declaring new variables n1 and n2 to split up the array and sort
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    int* L = (int*)malloc(n1 * sizeof(int));
+    int* R = (int*)malloc(n2 * sizeof(int));
+
+	//filling our newly created arrays with the info from the previous array
+    for (i = 0; i < n1; i++)
+        L[i] = pData[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = pData[m + 1 + j];
+
+    i = 0;
+    j = 0;
+    k = l;
+
+	//comparing the two given elements and placing one in front of the other
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            pData[k] = L[i];
+            i++;
+        }
+        else {
+            pData[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        pData[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        pData[k] = R[j];
+        j++;
+        k++;
+    }
+
+    extraMemoryAllocated += n1 * sizeof(int) + n2 * sizeof(int);
+
+    free(L);
+    free(R);
+}
+
 
 
 // implement merge sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
 {
+	//calculating the middle value in which the array will be split and compared
+	if (l < r) {
+        int m = l + (r - l) / 2;
+
+		//using recursive calls to sort the array by breaking it down to smaller pieces
+        mergeSort(pData, l, m);
+        mergeSort(pData, m + 1, r);
+        merge(pData, l, m, r);
+    }
 }
 
 // parses input file to an integer array
